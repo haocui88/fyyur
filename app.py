@@ -101,32 +101,28 @@ def search_venues():
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
-  venue = Venue.query.get(venue_id)
+  venue = Venue.query.filter_by(id=venue_id).first()
 
   if not venue: 
     return render_template('errors/404.html')
 
-  upcoming_shows_query = db.session.query(Show).join(Artist).filter(Show.venue_id==venue_id).filter(Show.start_time>datetime.now()).all()
-  upcoming_shows = []
-
-  past_shows_query = db.session.query(Show).join(Artist).filter(Show.venue_id==venue_id).filter(Show.start_time<datetime.now()).all()
+  all_shows = db.session.query(Show).join(Artist).filter(Show.venue_id==venue_id).all()
+  up_shows = []
   past_shows = []
 
-  for show in past_shows_query:
-    past_shows.append({
+  for show in all_shows:
+    artist = db.session.query(Artist.name).filter(Artist.id == Show.artist_id).first()
+    artist_show = {
       "artist_id": show.artist_id,
       "artist_name": show.artist.name,
       "artist_image_link": show.artist.image_link,
-      "start_time": show.start_time.strftime('%Y-%m-%d %H:%M:%S')
-    })
-
-  for show in upcoming_shows_query:
-    upcoming_shows.append({
-      "artist_id": show.artist_id,
-      "artist_name": show.artist.name,
-      "artist_image_link": show.artist.image_link,
-      "start_time": show.start_time.strftime("%Y-%m-%d %H:%M:%S")    
-    })
+      "start_time": show.start_time
+    }
+    
+    if (show.start_time < datetime.now()):
+          past_shows.append(artist_show)
+    else:
+          up_shows.append(artist_show)
 
   data = {
     "id": venue.id,
@@ -194,22 +190,18 @@ def create_venue_submission():
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
-  error = False
   try:
     venue = Venue.query.get(venue_id)
     db.session.delete(venue)
     db.session.commit()
+    flash('Venue {venue_id} was successfully deleted!')
   except:
-    error = True
     db.session.rollback()
     print(sys.exc_info())
+    flash('An error occurred! Venue {venue_id} could not be deleted.')
   finally:
     db.session.close()
-  if error: 
-    flash('An error occurred. Venue {venue_id} could not be deleted.')
-  if not error: 
-    flash('Venue {venue_id} was successfully deleted.')
-  return render_template('pages/home.html')
+  return redirect(url_for('venues'))
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
 
