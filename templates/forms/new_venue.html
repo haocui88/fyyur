@@ -30,12 +30,26 @@
       <div class="form-group">
         <label for="genres">Genres</label>
         <small>Ctrl+Click to select multiple</small>
-        {{ form.genres(class_ = 'form-control', placeholder='Genres, separated by commas', id=form.genres, autofocus = true) }}
+        {{ form.genres(class_ = 'form-control', placeholder='Genres, separated by commas', id=genres, autofocus = true) }}
       </div>
       <div class="form-group">
-          <label for="genres">Facebook Link</label>
-          {{ form.facebook_link(class_ = 'form-control', placeholder='http://', id=form.facebook_link, autofocus = true) }}
+          <label for="facebook_link">Facebook Link</label>
+          {{ form.facebook_link(class_ = 'form-control', placeholder='http://', id=facebook_link, autofocus = true) }}
+      </div>
+      <div class="form-group">
+          <label for="website">Website</label>
+          {{ form.website(class_ = 'form-control', placeholder='http://', id=website, autofocus = true) }}
+      </div>
+      <div class="form-group">
+          <label for="seeking_talent">Seeking Talent</label>
+          <small>Looking for new talent?</small>
+          {{ form.seeking_talent(class_ = 'form-control', autofocus = true) }}
         </div>
+        <div class="form-group">
+          <label for="seeking_description">Specifics or Details for the Artist's you are looking for</label>
+          {{ form.seeking_description(class_ = 'form-control', placeholder='We are looking for an artist to play on the weekend', autofocus = true) }}
+        </div>
+
       <input type="submit" value="Create Venue" class="btn btn-primary btn-lg btn-block">
     </form>
   </div>
