@@ -13,6 +13,7 @@ import logging
 from logging import Formatter, FileHandler
 from flask_wtf import Form
 from forms import *
+from models import *
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
@@ -24,60 +25,6 @@ db = SQLAlchemy(app)
 
 migrate = Migrate(app, db)
 # TODO: connect to a local postgresql database
-#----------------------------------------------------------------------------#
-# Models.
-#----------------------------------------------------------------------------#
-class Venue(db.Model):
-      __tablename__ = 'Venue'
-      id = db.Column(db.Integer, primary_key=True)
-      name = db.Column(db.String)
-      city = db.Column(db.String(120))
-      state = db.Column(db.String(120))
-      address = db.Column(db.String(120))
-      phone = db.Column(db.String(120))
-      image_link = db.Column(db.String(500))
-      facebook_link = db.Column(db.String(120))
-
-  # TODO: implement any missing fields, as a database migration using Flask-Migrate
-      genres = db.Column(db.ARRAY(db.String()))
-      website = db.Column(db.String(500))
-      seeking_talent = db.Column(db.Boolean, nullable=False)
-      seeking_description = db.Column(db.String(200))
-      upcoming_shows_count = db.Column(db.Integer, default=0)
-      past_shows_count = db.Column(db.Integer, default=0)
-      shows = db.relationship('Show', backref='venue', lazy=True)
-
-      
-class Artist(db.Model):
-  __tablename__ = 'Artist'
-
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String)
-  city = db.Column(db.String(120))
-  state = db.Column(db.String(120))
-  phone = db.Column(db.String(120))
-  genres = db.Column(db.String(120))
-  image_link = db.Column(db.String(500))
-  facebook_link = db.Column(db.String(120))
-
-  # TODO: implement any missing fields, as a database migration using Flask-Migrate
-  website = db.Column(db.String(500))
-  seeking_venue = db.Column(db.Boolean, nullable=False)
-  seeking_description = db.Column(db.String(200))
-  upcoming_shows_count = db.Column(db.Integer, default=0)
-  past_shows_count = db.Column(db.Integer,default=0)
-  shows = db.relationship('Show', backref='artist', lazy=True)
-
- 
-# TODO Implement Show and Artist models, and complete all model relationships and properties, as a database migration.
-class Show(db.Model):
-  __tablename__ = 'shows'
-  id = db.Column(db.Integer, primary_key=True)
-  artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'), nullable=False)
-  venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-  start_time = db.Column(db.DateTime, nullable=False)
-  upcoming = db.Column(db.Boolean, nullable=False, default=True)
-
 
 #----------------------------------------------------------------------------#
 # Filters.
@@ -185,7 +132,6 @@ def show_venue(venue_id):
     "id": venue.id,
     "name": venue.name,
     "genres": venue.genres,
-    "address": venue.address,
     "city": venue.city,
     "state": venue.state,
     "phone": venue.phone,
@@ -214,25 +160,18 @@ def create_venue_submission():
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modiferror = False
   error = False
-  form = VenueForm()
+  form = VenueForm(request.form)
   try:
-    venue = Venue()
-    venue.name = request.form['name']
-    venue.city = request.form['city']
-    venue.state = request.form['state']
-    venue.phone = request.form['phone']
-    imd_genres = request.form.getlist('genres')
-    venue.genres = ','.join(imd_genres)
-    venue.facebook_link = request.form['facebook_link']
-    venue.image_link = request.form['image_link']
-    venue.website = request.form['website']
-    venue.seeking_talent = True if 'seeking_talent' in request.form else False
-    venue.seeking_description = request.form['seeking_description']
-    db.session.add(artist)
-    db.session.commit()
-
+    venue = Venue(name = form.name.data, address = form.address.data,
+                  city = form.city.data, state = form.state.data,
+                  phone = form.city.data, genres= form.genres.data,
+                  facebook_link = form.facebook_link.data,
+                  website = form.website.data,
+                  seeking_talent = form.seeking_talent.data,
+                  seeking_description = form.seeking_description.data,)
     db.session.add(venue)
     db.session.commit()
+
   except: 
     error = True
     db.session.rollback()
